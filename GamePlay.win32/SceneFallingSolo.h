@@ -6,6 +6,7 @@
 #include "Audio.h"
 #include "debug.h"
 #include "UI.h"
+#include "NoteManager.h"
 
 #define WAVE_EFFECT_TAG 100
 USING_NS_CC;
@@ -15,7 +16,7 @@ class SceneFallingSolo : public cocos2d::Layer
 	public:
 
 	private:
-	AudioSystem::WaveData waveDataPrev;
+	NoteManager* noteManager;
 	Debug* debug;
 
 	public:
@@ -26,7 +27,6 @@ class SceneFallingSolo : public cocos2d::Layer
 	//Scene Part
 	void createBG();
 	void createHud();
-	void playBGM();
 
 	//implement the "static create()" method manually
 	CREATE_FUNC(SceneFallingSolo);

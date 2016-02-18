@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "SceneFallingSolo.h"
-#include "WStringSupport.h"
 #include "AppDelegate.h"
+
 
 #define random_r RandomHelper::random_real
 
@@ -35,6 +35,7 @@ bool SceneFallingSolo::init()
 	createBG();
 	createHud();
 
+	noteManager = new NoteManager("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
 
 	//Create debug class
 	debug = new Debug();
@@ -62,12 +63,6 @@ void SceneFallingSolo::createHud()
 		);
 }
 
-void SceneFallingSolo::playBGM()
-{
-	pAudioSystem->loadSoundFromFile("./audio/title.mp3", AudioSystem::SOUNDTYPE::BGM);
-	pAudioSystem->playBGM(0);
-	waveDataPrev = pAudioSystem->getWaveData();
-}
 
 
 void SceneFallingSolo::update(float dt)
@@ -76,23 +71,4 @@ void SceneFallingSolo::update(float dt)
 
 void SceneFallingSolo::debugMsg()
 {
-	debug->deltaTime += Director::getInstance()->getDeltaTime();
-	if (debug->deltaTime > 0.032)
-	{
-		debug->deltaTime = 0;
-		auto bgl = this->getChildByName("bgLayer");
-		bgl->removeChildByName("debugLabel");
-		char* msg = new char[256];
-		sprintf(msg,
-				"Audio Peak:\r\nLchAbs= %+2.5e\r\nRchAbs= %+2.5e\r\nMixAvg= %+2.5e\r\n\r\nMouse Position=(%.2f,%.2f)\r\nMouse Button=%d",
-				abs(waveDataPrev.L),
-				abs(waveDataPrev.R),
-				waveDataPrev.MIX,
-				debug->mousePosi.x,
-				debug->mousePosi.y,
-				debug->mouseButton);
-		auto debuglb = debug->debugLabelMsg(msg);
-		debuglb->setName("debugLabel");
-		bgl->addChild(debuglb);
-	}
 }
