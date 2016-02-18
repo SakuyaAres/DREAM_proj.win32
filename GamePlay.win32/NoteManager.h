@@ -39,8 +39,10 @@ class NoteManager
 		int startTime;
 		bool isHighlight;
 		double bpm;
+		float speedModer;
 	};
 	Timing* timingLines;
+	int timingLinesSize;
 	
 	struct Note
 	{
@@ -67,4 +69,5 @@ class NoteManager
 	void loadfile(string filepath);
 	void loadOsuFile();
 	void loadOsuFileInfo(string& retBuffer);
+	void loadOsuFileTiming(string& retBuffer);
 };

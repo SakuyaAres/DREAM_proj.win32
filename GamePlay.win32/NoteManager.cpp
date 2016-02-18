@@ -46,6 +46,7 @@ void NoteManager::loadOsuFile()
 		{
 			loadOsuFileInfo(buffer);
 		}
+		else if (buffer.compare("[TimingPoints]") == 0) loadOsuFileTiming(buffer);
 		else
 		{
 			getline(file, buffer); continue;
@@ -69,8 +70,8 @@ void NoteManager::loadOsuFileInfo(string& retBuffer)
 		if (linedata.empty()) continue;
 		vector<string> data;
 		split(trim(linedata), data, ":");
-		if (!data.empty()) name = data[0];
-		else continue;
+		if (data.empty()) continue;
+		else name = data[0];
 		if (data.size() > 1) value = trim(data[1]);
 		else value = "";
 		if (name.compare("AudioFilename") == 0) { musicFile = value; continue; }
@@ -85,5 +86,41 @@ void NoteManager::loadOsuFileInfo(string& retBuffer)
 		if (name.compare("Source") == 0) { metaData.source = value; continue; }
 		if (name.compare("Tags") == 0) { metaData.tag = value; continue; }
 		if (name.compare("CircleSize") == 0) { trackCount = atoi(value.c_str()); continue; }
+	}
+}
+
+void NoteManager::loadOsuFileTiming(string & retBuffer)
+{
+	string linedata;
+	vector<Timing> vTimings;
+	Timing timing;
+	while (!file.eof())
+	{
+		getline(file, linedata);
+		if (linedata[0] == '[')
+		{
+			retBuffer = linedata;
+			break;
+		}
+		if (linedata.empty()) continue;
+		vector<string> data;
+		split(trim(linedata), data, ",");
+		if (data.empty() || data.size() < 8) continue;
+		timing.startTime = atof(data[0].c_str());
+		float mpb = atof(data[1].c_str());
+		if (mpb > 0)
+		{
+			timing.bpm = 60000 / mpb;
+			timing.speedModer = 1.0;
+		}
+		else timing.speedModer = 100 / mpb * -1;
+		timing.isHighlight = atoi(data[7].c_str()) == 1 ? true : false;
+		vTimings.push_back(timing);
+	}
+	timingLinesSize = vTimings.size();
+	timingLines = new Timing[timingLinesSize];
+	for (int i = 0; i < timingLinesSize; i++)
+	{
+		timingLines[i] = vTimings[i];
 	}
 }
