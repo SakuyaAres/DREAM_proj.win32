@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="win32">
+      <UniqueIdentifier>{84a8ebd7-7cf0-47f6-b75e-d441df67da40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{715254bc-d70b-4ec5-bf29-467dd3ace079}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{4e1bc3c8-3381-4fea-9ed4-f73a8edff7b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\fmod">
+      <UniqueIdentifier>{5c67a2ed-c4b4-4864-9398-6a79b21ee9ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gameplay">
+      <UniqueIdentifier>{bb6c862e-70e9-49d9-81b7-3829a6f50471}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay.win32\AppDelegate.cpp">
+      <Filter>gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay.win32\ControllerFallingMode.cpp">
+      <Filter>gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay.win32\NoteManager.cpp">
+      <Filter>gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay.win32\SceneFallingSolo.cpp">
+      <Filter>gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay.win32\SceneMainMenu.cpp">
+      <Filter>gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.win32\Audio.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.win32\debug.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.win32\UI.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.win32\WStringSupport.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmod\inc\fmod.h">
+      <Filter>common\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmod\inc\fmod.hpp">
+      <Filter>common\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmod\inc\fmod_codec.h">
+      <Filter>common\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmod\inc\fmod_dsp.h">
+      <Filter>common\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmod\inc\fmod_errors.h">
+      <Filter>common\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmod\inc\fmod_memoryinfo.h">
+      <Filter>common\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmod\inc\fmod_output.h">
+      <Filter>common\fmod</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay.win32\AppDelegate.h">
+      <Filter>gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay.win32\ControllerFallingMode.h">
+      <Filter>gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay.win32\NoteManager.h">
+      <Filter>gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay.win32\SceneFallingSolo.h">
+      <Filter>gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay.win32\SceneMainMenu.h">
+      <Filter>gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.win32\Audio.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.win32\debug.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.win32\UI.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.win32\WStringSupport.h">
+      <Filter>common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="game.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
