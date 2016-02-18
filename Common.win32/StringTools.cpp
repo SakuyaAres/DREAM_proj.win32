@@ -15,7 +15,7 @@ string strtool::trim(const string& str)
 	return str.substr(pos);
 }
 
-int strtool::split(const string& str, vector<string>& ret_, string sep = ",")
+int strtool::split(const string& str, vector<string>& ret_, string sep)
 {
 	if (str.empty())
 	{

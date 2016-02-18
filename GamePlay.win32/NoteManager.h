@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ enum NoteType
 
 class NoteManager
 {
-	private:
+	public:
 	ifstream file;
 	string musicFile;
 	int previewPoint;
@@ -28,6 +29,8 @@ class NoteManager
 		string artistUTF;
 		string noter;
 		string version;
+		string source;
+		string tag;
 	};
 	MetaData metaData;
 
@@ -63,6 +66,5 @@ class NoteManager
 
 	void loadfile(string filepath);
 	void loadOsuFile();
-	void loadOsuFileGenData();
-
+	void loadOsuFileInfo(string& retBuffer);
 };
