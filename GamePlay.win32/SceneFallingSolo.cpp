@@ -34,14 +34,14 @@ bool SceneFallingSolo::init()
 
 	createBG();
 	createHud();
-	createPlayerPanel(5);
+	pNoteManager = new NoteManager("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
 
-	createFadeInMask();
-	noteManager = new NoteManager("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
+	createPlayerPanel(pNoteManager->trackCount);
 
 	//Create debug class
 	debug = new Debug();
 
+	createFadeInMask();
 	scheduleUpdate();
 
 	return true;

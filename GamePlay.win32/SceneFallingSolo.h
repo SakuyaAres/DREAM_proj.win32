@@ -16,7 +16,7 @@ class SceneFallingSolo : public cocos2d::Layer
 	public:
 
 	private:
-	NoteManager* noteManager;
+	NoteManager* pNoteManager;
 	Debug* debug;
 
 	public:
