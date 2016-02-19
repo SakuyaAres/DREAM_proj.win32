@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "UI.h"
 #include "NoteManager.h"
+#include "ControllerFallingMode.h"
 
 #define WAVE_EFFECT_TAG 100
 USING_NS_CC;
@@ -17,6 +18,7 @@ class SceneFallingSolo : public cocos2d::Layer
 
 	private:
 	NoteManager* pNoteManager;
+	ControllerFallingMode* pGameController;
 	Debug* debug;
 
 	public:

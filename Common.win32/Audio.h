@@ -16,9 +16,10 @@ class AudioSystem
 
 	enum SOUNDTYPE
 	{
-		BGM = 0,
-		SFX = 1,
-		LOOP_BGM = 2
+		BGM,
+		SFX,
+		LOOP_BGM,
+		LOAD_BGM
 	};
 
 	struct WaveData
@@ -28,21 +29,24 @@ class AudioSystem
 		float MIX = 0;
 	};
 
-	public:
-	void loadSoundFromFile(const std::string& pFilename, SOUNDTYPE sndtype);
-	void playBGM(int bgmIndex);
-	void playSFX(int sfxIndex);
-	long getBgmPosition();
-	WaveData getWaveData();
-
 	private:
 	System* pSystem;
 	Sound* pCurBGM;
 	SoundGroup* pBGMGroup;
 	SoundGroup* pSFXGroup;
 	Channel* pBGMChannel;
+	unsigned int bgmLength;
 
-	private:
+	public:
+	void loadSoundFromFile(const std::string& pFilename, SOUNDTYPE sndtype);
+	void playBGM();
+	void pauseBGM();
+	void resumeBGM();
+	void stopBGM();
+	void playSFX(int sfxIndex);
+	unsigned int getBgmLength();
+	unsigned int getBgmPosition();
+	WaveData getWaveData();
 
 };
 

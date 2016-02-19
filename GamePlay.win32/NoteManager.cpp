@@ -108,21 +108,22 @@ void NoteManager::loadOsuFileTiming(string & retBuffer)
 		split(trim(linedata), data, ",");
 		if (data.empty() || data.size() < 8) continue;
 		timing.startTime = atof(data[0].c_str());
-		float mpb = atof(data[1].c_str());
-		if (mpb > 0)
+		timing.mspb = atof(data[1].c_str());
+		if (timing.mspb > 0)
 		{
-			timing.bpm = 60000 / mpb;
+			timing.bpm = 60000 / timing.mspb;
 			timing.speedModer = 1.0;
 		}
-		else timing.speedModer = 100 / mpb * -1;
+		else timing.speedModer = 100 / timing.mspb * -1;
 		timing.isHighlight = atoi(data[7].c_str()) == 1 ? true : false;
 		vTimings.push_back(timing);
 	}
-	timingLinesSize = vTimings.size();
-	timingLines = new Timing[timingLinesSize];
-	for (int i = 0; i < timingLinesSize; i++)
+	timingSegsSize = vTimings.size();
+	timingSegs = new Timing[timingSegsSize];
+	for (int i = 0; i < timingSegsSize; i++)
 	{
-		timingLines[i] = vTimings[i];
+		if (i > 0 && vTimings[i].mspb < 0) vTimings[i].mspb = vTimings[i - 1].mspb;
+		timingSegs[i] = vTimings[i];
 	}
 }
 

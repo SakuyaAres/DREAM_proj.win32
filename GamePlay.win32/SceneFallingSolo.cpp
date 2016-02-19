@@ -9,24 +9,16 @@ USING_NS_CC;
 
 Scene* SceneFallingSolo::createScene()
 {
-	// 'scene' is an autorelease object
 	auto scene = Scene::create();
-
-	// 'layer' is an autorelease object
 	auto layer = SceneFallingSolo::create();
-	// add layer as a child to scene
 	layer->setAnchorPoint(Point(0.5, 0.5));
 	scene->addChild(layer);
-
-	// return the scene
 	return scene;
 }
 
-// on "init" you need to initialize your instance
 bool SceneFallingSolo::init()
 {
-	//////////////////////////////
-	// 1. super init first
+
 	if (!Layer::init())
 	{
 		return false;
@@ -34,14 +26,22 @@ bool SceneFallingSolo::init()
 
 	createBG();
 	createHud();
-	pNoteManager = new NoteManager("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
+	pGameController = new ControllerFallingMode("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
+	
+	createPlayerPanel(pGameController->getTrackCount());
+	pGameController->setNoteField(this->getChildByName("panelFrame")->getChildByName("panelClip")->getChildByName("panelNoteField"));
 
-	createPlayerPanel(pNoteManager->trackCount);
+	//pNoteManager = new NoteManager("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
+	//auto scene = Director::getInstance()->getRunningScene();
 
 	//Create debug class
 	debug = new Debug();
 
 	createFadeInMask();
+
+	//Audio System operation
+	pAudioSystem->stopBGM();
+
 	scheduleUpdate();
 
 	return true;
@@ -77,10 +77,14 @@ void SceneFallingSolo::createPlayerPanel(int trackCount)
 
 	Rect clipRect = Rect(1, visibleSize.height / 8, panelSize.width - 2, panelSize.height);
 	auto clipNode = ClippingRectangleNode::create(clipRect);
-	clipNode->setName("panelClipNode");
+	clipNode->setName("panelClip");
 	layerPanelFrame->addChild(clipNode);
 	auto layerGrad = LayerGradient::create(Color4B(0, 0, 0, 96), Color4B(0, 0, 0, 192));
 	clipNode->addChild(layerGrad);
+	auto layerNoteField = LayerColor::create(Color4B(0, 0, 0, 0), panelSize.width, panelSize.height * 7 / 8);
+	layerNoteField->setPosition(Point(1, visibleSize.height / 8));
+	layerNoteField->setName("panelNoteField");
+	clipNode->addChild(layerNoteField);
 }
 
 void SceneFallingSolo::createFadeInMask()
@@ -101,6 +105,7 @@ void SceneFallingSolo::createFadeInMask()
 
 void SceneFallingSolo::update(float dt)
 {
+	pGameController->updateNote(dt);
 }
 
 void SceneFallingSolo::debugMsg()

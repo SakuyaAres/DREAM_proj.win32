@@ -20,27 +20,29 @@ AudioSystem::~AudioSystem()
 
 void AudioSystem::loadSoundFromFile(const std::string & pFilename, SOUNDTYPE sndtype)
 {
-	//const char* testpath = FileUtils::getInstance()->getWritablePath().c_str();
-	//const char* fullPath = FileUtils::getInstance()->fullPathForFilename(pFilename).c_str();
 	const char* filepath = pFilename.c_str();
 	Sound* pSound = nullptr;
 	FMOD_MODE mode = FMOD_HARDWARE | FMOD_2D;
-	//FMOD_RESULT result = pSystem->createSound(
-	//	filepath,
-	//	sndtype == LOOP_BGM ? mode | FMOD_LOOP_NORMAL : mode | FMOD_LOOP_OFF,
-	//	0,
-	//	sndtype == LOOP_BGM ? &pCurBGM : nullptr
-	//	);
-	//sndtype == LOOP_BGM ?
-	//	pCurBGM->setSoundGroup(sndtype == SFX ? pSFXGroup : pBGMGroup) :
-	//	pSound->setSoundGroup(pSFXGroup);
-	FMOD_RESULT result = pSystem->createSound(filepath, FMOD_HARDWARE | FMOD_2D | FMOD_LOOP_OFF, 0, &pCurBGM);
+	FMOD_RESULT result;
+	switch (sndtype)
+	{
+		case BGM:
+			result = pSystem->createStream(filepath, FMOD_HARDWARE | FMOD_2D | FMOD_LOOP_OFF, 0, &pCurBGM);
+			break;
+		case SFX:
+			result = pSystem->createSound(filepath, FMOD_HARDWARE | FMOD_2D | FMOD_LOOP_OFF, 0, &pCurBGM);
+			break;
+		case LOAD_BGM:
+			result = pSystem->createSound(filepath, FMOD_HARDWARE | FMOD_2D | FMOD_LOOP_OFF, 0, &pCurBGM);
+			break;
+		default:
+			break;
+	}
+	pCurBGM->getLength(&bgmLength, FMOD_TIMEUNIT_MS);
 }
 
-void AudioSystem::playBGM(int bgmIndex)
+void AudioSystem::playBGM()
 {
-	//Sound* pBGM;
-	//pBGMGroup->getSound(bgmIndex, &pBGM);
 	FMOD_RESULT result = pSystem->playSound(
 		FMOD_CHANNEL_REUSE,
 		pCurBGM,
@@ -48,6 +50,21 @@ void AudioSystem::playBGM(int bgmIndex)
 		&pBGMChannel
 		);
 	pBGMChannel->setPaused(false);
+}
+
+void AudioSystem::pauseBGM()
+{
+	pBGMChannel->setPaused(true);
+}
+
+void AudioSystem::resumeBGM()
+{
+	pBGMChannel->setPaused(false);
+}
+
+void AudioSystem::stopBGM()
+{
+	FMOD_RESULT result = pBGMChannel->stop();
 }
 
 void AudioSystem::playSFX(int sfxIndex)
@@ -62,7 +79,12 @@ void AudioSystem::playSFX(int sfxIndex)
 		);
 }
 
-long AudioSystem::getBgmPosition()
+unsigned int AudioSystem::getBgmLength()
+{
+	return bgmLength;
+}
+
+unsigned int AudioSystem::getBgmPosition()
 {
 	unsigned int posi = 0;
 	pBGMChannel->getPosition(&posi, FMOD_TIMEUNIT_MS);

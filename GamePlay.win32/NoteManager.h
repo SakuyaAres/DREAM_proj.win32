@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 
+
 using namespace std;
 
 class NoteManager
@@ -32,11 +33,12 @@ class NoteManager
 	{
 		int startTime;
 		bool isHighlight;
+		double mspb;
 		double bpm;
 		float speedModer;
 	};
-	Timing* timingLines;
-	int timingLinesSize;
+	Timing* timingSegs;
+	int timingSegsSize;
 	
 	struct Note
 	{
@@ -50,7 +52,7 @@ class NoteManager
 		int endTime;
 	};
 	vector<Note>* trackNotes;
-
+	
 	public:
 	NoteManager(string filepath);
 	virtual ~NoteManager();
