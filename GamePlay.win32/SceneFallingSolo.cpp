@@ -57,6 +57,7 @@ void SceneFallingSolo::createBG()
 void SceneFallingSolo::createHud()
 {
 	auto layerHudTL = LayerColor::create(pUI->themeColorB(255), visibleSize.width*0.25, visibleSize.height*0.1);
+	layerHudTL->setPosition(Point(0, visibleSize.height*0.9));
 	this->addChild(layerHudTL);
 }
 
