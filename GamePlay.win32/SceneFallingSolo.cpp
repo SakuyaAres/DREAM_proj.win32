@@ -34,7 +34,9 @@ bool SceneFallingSolo::init()
 
 	createBG();
 	createHud();
+	createPlayerPanel(5);
 
+	createFadeInMask();
 	noteManager = new NoteManager("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
 
 	//Create debug class
@@ -55,11 +57,42 @@ void SceneFallingSolo::createBG()
 void SceneFallingSolo::createHud()
 {
 	auto layerHudTL = LayerColor::create(pUI->themeColorB(255), visibleSize.width*0.25, visibleSize.height*0.1);
-	layerHudTL->setPosition(Point(0, visibleSize.height - layerHudTL->getContentSize().height));
-	layerHudTL->setOpacity(0);
 	this->addChild(layerHudTL);
-	layerHudTL->runAction(
-		FadeTo::create(0.5, 255)
+}
+
+void SceneFallingSolo::createPlayerPanel(int trackCount)
+{
+	float trackWidth = visibleSize.width / 16;
+	Size panelSize = Size(trackWidth*trackCount, visibleSize.height);
+	auto layerPanelFrame = LayerColor::create(pUI->themeColorB(0), panelSize.width, panelSize.height);
+	layerPanelFrame->setPosition((visibleSize.width - panelSize.width) / 2, 0);
+	this->addChild(layerPanelFrame);
+	auto frameNode = DrawNode::create();
+	layerPanelFrame->addChild(frameNode);
+	frameNode->drawLine(Point(0, 0), Point(0, panelSize.height), pUI->themeColorF(255));
+	frameNode->drawLine(Point(panelSize.width, 0), Point(panelSize.width, panelSize.height), pUI->themeColorF(255));
+	frameNode->drawSolidRect(Point(0, 0), Point(panelSize.width, visibleSize.height / 8), pUI->themeColorF(255));
+
+	Rect clipRect = Rect(1, visibleSize.height / 8, panelSize.width - 2, panelSize.height);
+	auto clipNode = ClippingRectangleNode::create(clipRect);
+	clipNode->setName("panelClipNode");
+	layerPanelFrame->addChild(clipNode);
+	auto layerGrad = LayerGradient::create(Color4B(0, 0, 0, 96), Color4B(0, 0, 0, 192));
+	clipNode->addChild(layerGrad);
+
+}
+
+void SceneFallingSolo::createFadeInMask()
+{
+	auto layerFadeInMask = LayerColor::create(Color4B::WHITE);
+	layerFadeInMask->setPosition(Point(0, visibleSize.height - layerFadeInMask->getContentSize().height));
+	layerFadeInMask->setName("layerFadeInMask");
+	this->addChild(layerFadeInMask);
+	layerFadeInMask->runAction(
+		Sequence::createWithTwoActions(
+			FadeTo::create(0.5, 0),
+			CallFunc::create([&] { this->removeChildByName("layerFadeInMask"); })
+			)
 		);
 }
 

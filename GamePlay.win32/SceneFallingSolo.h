@@ -27,6 +27,9 @@ class SceneFallingSolo : public cocos2d::Layer
 	//Scene Part
 	void createBG();
 	void createHud();
+	void createPlayerPanel(int trackCount);
+
+	void createFadeInMask();
 
 	//implement the "static create()" method manually
 	CREATE_FUNC(SceneFallingSolo);
