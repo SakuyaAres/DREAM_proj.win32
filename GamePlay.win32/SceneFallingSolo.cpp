@@ -67,6 +67,7 @@ void SceneFallingSolo::createPlayerPanel(int trackCount)
 	Size panelSize = Size(trackWidth*trackCount, visibleSize.height);
 	auto layerPanelFrame = LayerColor::create(pUI->themeColorB(0), panelSize.width, panelSize.height);
 	layerPanelFrame->setPosition((visibleSize.width - panelSize.width) / 2, 0);
+	layerPanelFrame->setName("panelFrame");
 	this->addChild(layerPanelFrame);
 	auto frameNode = DrawNode::create();
 	layerPanelFrame->addChild(frameNode);
@@ -80,7 +81,6 @@ void SceneFallingSolo::createPlayerPanel(int trackCount)
 	layerPanelFrame->addChild(clipNode);
 	auto layerGrad = LayerGradient::create(Color4B(0, 0, 0, 96), Color4B(0, 0, 0, 192));
 	clipNode->addChild(layerGrad);
-
 }
 
 void SceneFallingSolo::createFadeInMask()

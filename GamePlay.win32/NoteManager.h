@@ -5,12 +5,6 @@
 
 using namespace std;
 
-enum NoteType
-{
-	FallingSingle,
-	FallingLong
-};
-
 class NoteManager
 {
 	public:
@@ -55,12 +49,7 @@ class NoteManager
 		}noteType;
 		int endTime;
 	};
-
-	struct FallingTrack
-	{
-		int trackIndex;
-		Note* notes;
-	};
+	vector<Note>* trackNotes;
 
 	public:
 	NoteManager(string filepath);
@@ -70,4 +59,5 @@ class NoteManager
 	void loadOsuFile();
 	void loadOsuFileInfo(string& retBuffer);
 	void loadOsuFileTiming(string& retBuffer);
+	void loadOsuFileNote(string& retBuffer);
 };

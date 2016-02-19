@@ -47,6 +47,7 @@ void NoteManager::loadOsuFile()
 			loadOsuFileInfo(buffer);
 		}
 		else if (buffer.compare("[TimingPoints]") == 0) loadOsuFileTiming(buffer);
+		else if (buffer.compare("[HitObjects]") == 0) loadOsuFileNote(buffer);
 		else
 		{
 			getline(file, buffer); continue;
@@ -122,5 +123,35 @@ void NoteManager::loadOsuFileTiming(string & retBuffer)
 	for (int i = 0; i < timingLinesSize; i++)
 	{
 		timingLines[i] = vTimings[i];
+	}
+}
+
+void NoteManager::loadOsuFileNote(string & retBuffer)
+{
+	string linedata;
+	vector<Note> vNotes;
+	Note note;
+	int maxPosX = 0;
+	while (!file.eof())
+	{
+		getline(file, linedata);
+		if (linedata.empty()) continue;
+		vector<string> data;
+		split(trim(linedata), data, ",");
+		note.positionX = atoi(data[0].c_str());
+		if (note.positionX > maxPosX) maxPosX = note.positionX;
+		note.startTime = atoi(data[2].c_str());
+		char endtime[8];
+		sscanf(data[5].c_str(), "%[^:]", endtime);
+		note.endTime = atoi(endtime);
+		note.noteType = note.endTime ? note.LONG : note.SINGLE;
+		vNotes.push_back(note);
+	}
+	int divisor = maxPosX / trackCount;
+	trackNotes = new vector<Note>[trackCount];
+	for (int i = 0; i < vNotes.size(); i++)
+	{
+		int trackNo = vNotes[i].positionX / divisor;
+		trackNotes[trackNo < trackCount ? trackNo : trackCount - 1].push_back(vNotes[i]);
 	}
 }
