@@ -296,7 +296,7 @@ void SceneMainMenu::createMenu()
 
 void SceneMainMenu::playBGM()
 {
-	pAudioSystem->loadSoundFromFile("./audio/title.mp3", AudioSystem::SOUNDTYPE::BGM);
+	pAudioSystem->loadSoundFromFile("./audio/title.mp3", AudioSystem::SOUNDTYPE::BGM, true);
 	pAudioSystem->playBGM();
 	waveDataPrev = pAudioSystem->getWaveData();
 }

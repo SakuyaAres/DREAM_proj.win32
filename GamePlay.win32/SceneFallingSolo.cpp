@@ -26,7 +26,7 @@ bool SceneFallingSolo::init()
 
 	createBG();
 	createHud();
-	pGameController = new ControllerFallingMode("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
+	pGameController = new ControllerFallingMode("musicdata/296478 FLOOR LEGENDS -KAC 2012- - KAC 2012 ULTIMATE MEDLEY -HISTORIA SOUND VOLTEX-/FLOOR LEGENDS -KAC 2012- - KAC 2012 ULTIMATE MEDLEY -HISTORIA SOUND VOLTEX- (Spy) [Ichi's INFINITE Lv.16].osu");
 	
 	createPlayerPanel(pGameController->getTrackCount());
 	pGameController->setNoteField(this->getChildByName("panelFrame")->getChildByName("panelClip")->getChildByName("panelNoteField"));

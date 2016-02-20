@@ -16,6 +16,7 @@ class ControllerFallingMode
 	public:
 	NoteManager* pNoteMgr;
 	Node* pNoteField;
+	float singleNoteHeight = 10;
 	float baseSpeed = 2;
 	bool isPaused = false;
 
@@ -36,6 +37,7 @@ class ControllerFallingMode
 	bool bgmIsPausedPrev = false;
 	int curTime;
 	int topTime;
+	int dspClockInit;
 	int deltaTime;
 	struct TimeSegPara
 	{
@@ -49,6 +51,7 @@ class ControllerFallingMode
 		Node* obj;
 		NoteManager::Note info;
 		bool hitting = false;
+		bool resized = false;
 	};
 	vector<NoteObj>* notesInTrack;
 	int* indexInTrack;
@@ -69,5 +72,10 @@ class ControllerFallingMode
 	void moveNotesInField();
 	void setTopTime();
 	void drawNewNotes();
+	void resizeLongNotes();
+	Node* createNote(vector<NoteManager::Note>::iterator noteIter,int trackIndex);
 	void removeOldNotes();
+	void deleteNote(int trackIndex, vector<NoteObj>::iterator noteIter);
+
+	int findTimeSeg(int timePoint);
 };

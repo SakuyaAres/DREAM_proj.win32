@@ -36,9 +36,10 @@ class AudioSystem
 	SoundGroup* pSFXGroup;
 	Channel* pBGMChannel;
 	unsigned int bgmLength;
+	int sampleRate;
 
 	public:
-	void loadSoundFromFile(const std::string& pFilename, SOUNDTYPE sndtype);
+	void loadSoundFromFile(const std::string& pFilename, SOUNDTYPE sndtype, bool isSoftware);
 	void playBGM();
 	void pauseBGM();
 	void resumeBGM();
@@ -47,6 +48,8 @@ class AudioSystem
 	unsigned int getBgmLength();
 	unsigned int getBgmPosition();
 	WaveData getWaveData();
+	int getDSPClockInMS();
+	unsigned long getSampleRate();
 
 };
 
