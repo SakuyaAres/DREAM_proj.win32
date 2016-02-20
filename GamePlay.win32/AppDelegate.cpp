@@ -5,6 +5,7 @@
 #define _GLEW_USE_DWM_SWAP_INTERVAL 0
 
 USING_NS_CC;
+using namespace std;
 
 static cocos2d::Size designResolutionSize = cocos2d::Size(1280, 720);
 static cocos2d::Size smallResolutionSize = cocos2d::Size(640, 360);
@@ -13,8 +14,8 @@ static cocos2d::Size largeResolutionSize = cocos2d::Size(1920, 1080);
 
 typedef void (APIENTRY *PFNWGLEXTSWAPCONTROLPROC) (int);
 typedef int(*PFNWGLEXTGETSWAPINTERVALPROC) (void);
-PFNWGLEXTSWAPCONTROLPROC wglSwapIntervalEXT = NULL;
-PFNWGLEXTGETSWAPINTERVALPROC wglGetSwapIntervalEXT = NULL;
+PFNWGLEXTSWAPCONTROLPROC wglSwapIntervalEXTb = NULL;
+PFNWGLEXTGETSWAPINTERVALPROC wglGetSwapIntervalEXTb = NULL;
 
 Vec2 originPoint;
 Size visibleSize;
@@ -22,12 +23,14 @@ AudioSystem* pAudioSystem;
 UI* pUI;
 Scene* pSceneMainMenu;
 Scene* pSceneFallingSolo;
+ofstream plogfile;
 
 AppDelegate::AppDelegate() :
 	maxFps(1200),
 	swapInterval(0)
 {
-
+	plogfile.open("dream.log", ios::out);
+	plogfile << "logtest\n";
 }
 
 AppDelegate::~AppDelegate()
@@ -45,6 +48,32 @@ void AppDelegate::initGLContextAttrs()
 	GLView::setGLContextAttrs(glContextAttrs);
 }
 
+void AppDelegate::setGLVsync(bool enabled)
+{
+	// Detect vSync
+	char* extensions = (char*)glGetString(GL_EXTENSIONS);
+	bool isVsyncInit = false;
+	if (strstr(extensions, "WGL_EXT_swap_control")!=NULL)
+	{
+		wglSwapIntervalEXTb = (PFNWGLEXTSWAPCONTROLPROC)wglGetProcAddress("wglSwapIntervalEXT");
+		wglGetSwapIntervalEXTb = (PFNWGLEXTGETSWAPINTERVALPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
+		isVsyncInit = true;
+	}
+	//if (enabled&&isVsyncInit) wglSwapIntervalEXT(0);
+	//else wglSwapIntervalEXT(1);
+	if (wglSwapIntervalEXT == NULL) return;
+	if (enabled) 
+	{
+		if(isVsyncInit) wglSwapIntervalEXTb(0);
+		else wglSwapIntervalEXT(0);
+	}
+	else
+	{
+		if (isVsyncInit) wglSwapIntervalEXTb(1);
+		else wglSwapIntervalEXT(1);
+	}
+}
+
 // If you want to use packages manager to install more packages, 
 // don't modify or remove this function
 static int register_all_packages()
@@ -54,9 +83,11 @@ static int register_all_packages()
 
 bool AppDelegate::applicationDidFinishLaunching() {
 	// initialize director
+	plogfile << "logtest1\n";
+
+
 	auto director = Director::getInstance();
 	auto glview = director->getOpenGLView();
-
 	if (!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
 		glview = GLViewImpl::createWithRect("Dream_Cocos", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
@@ -67,18 +98,13 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	}
 	// turn on display FPS
 	director->setDisplayStats(true);
+	setGLVsync(true);
+	plogfile << "logtest2\n";
+	plogfile.close();
 
 	// set FPS. the default value is 1.0/60 if you don't call this
 	director->setAnimationInterval(1.0 / maxFps);
 
-	// Detect vSync
-	char* extensions = (char*)glGetString(GL_EXTENSIONS);
-	if (strstr(extensions, "WGL_EXT_swap_control"))
-	{
-		wglSwapIntervalEXT = (PFNWGLEXTSWAPCONTROLPROC)wglGetProcAddress("wglSwapIntervalEXT");
-		wglGetSwapIntervalEXT = (PFNWGLEXTGETSWAPINTERVALPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
-	}
-	wglSwapIntervalEXT(swapInterval);
 
 	// Set Clear Color
 	glClearColor(255.0, 255.0, 255.0, 1.0);
@@ -101,9 +127,10 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	{
 		director->setContentScaleFactor(MIN(smallResolutionSize.height / designResolutionSize.height, smallResolutionSize.width / designResolutionSize.width));
 	}
+	plogfile << "logtest3\n";
 
 	register_all_packages();
-	
+
 	// create fmodex audio system
 	pAudioSystem = new AudioSystem();
 

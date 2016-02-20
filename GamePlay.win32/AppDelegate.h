@@ -4,6 +4,8 @@
 #include "cocos2d.h"
 #include "Audio.h"
 #include "UI.h"
+#include <fstream>
+#include "GL\wglew.h"
 
 /**
 @brief    The cocos2d Application.
@@ -22,6 +24,8 @@ class  AppDelegate : private cocos2d::Application
 	int swapInterval;
 
 	virtual void initGLContextAttrs();
+
+	virtual void setGLVsync(bool enabled);
 
 	/**
 	@brief    Implement Director and Scene init code here.
