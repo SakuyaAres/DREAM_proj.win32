@@ -35,12 +35,13 @@ class ControllerFallingMode
 	unsigned int bgmLength;
 	bool bgmStarted = false;
 	bool bgmIsPausedPrev = false;
-	int curTime;
-	int topTime;
+	float curTime;
+	float topTime;
 	int dspClockInit;
-	int deltaTime;
+	float deltaTime;
 	struct TimeSegPara
 	{
+		int startTime;
 		float noteSpeedPerMs; // GLPoint per ms
 		float timeFlowSpeedPerGLP; // ms per GLPoint
 	};
@@ -62,20 +63,27 @@ class ControllerFallingMode
 	void initGamePlay();
 	void setTimeSegPara();
 	void updateNote(float dt);
-
+	
 	public:
 	int getTrackCount();
+	int getTimeSeg(int timePoint);
 
 	private:
 	void setBGMStat();
-	void setCurTime(float dt);
+	bool setCurTime(float dt);
 	void moveNotesInField();
 	void setTopTime();
 	void drawNewNotes();
+	float getNoteOffsetY(int timePoint);
+	Node* createNote(vector<NoteManager::Note>::iterator noteIter, int trackIndex);
+	void setNewNotePos(NoteObj* note, int trackIndex);
 	void resizeLongNotes();
-	Node* createNote(vector<NoteManager::Note>::iterator noteIter,int trackIndex);
 	void removeOldNotes();
 	void deleteNote(int trackIndex, vector<NoteObj>::iterator noteIter);
 
-	int findTimeSeg(int timePoint);
+	void autoPlay();
+
+	public:
+	int getCurTime();
+	int getTopTime();
 };

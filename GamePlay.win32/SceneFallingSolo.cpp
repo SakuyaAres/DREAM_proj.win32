@@ -26,7 +26,7 @@ bool SceneFallingSolo::init()
 
 	createBG();
 	createHud();
-	pGameController = new ControllerFallingMode("musicdata/296478 FLOOR LEGENDS -KAC 2012- - KAC 2012 ULTIMATE MEDLEY -HISTORIA SOUND VOLTEX-/FLOOR LEGENDS -KAC 2012- - KAC 2012 ULTIMATE MEDLEY -HISTORIA SOUND VOLTEX- (Spy) [Ichi's INFINITE Lv.16].osu");
+	pGameController = new ControllerFallingMode("musicdata/198380 sakuzyo - Neurotoxin/sakuzyo - Neurotoxin (Rumia-) [Black Another].osu");
 	
 	createPlayerPanel(pGameController->getTrackCount());
 	pGameController->setNoteField(this->getChildByName("panelFrame")->getChildByName("panelClip")->getChildByName("panelNoteField"));
@@ -63,8 +63,8 @@ void SceneFallingSolo::createHud()
 
 void SceneFallingSolo::createPlayerPanel(int trackCount)
 {
-	float trackWidth = visibleSize.width / 16;
-	Size panelSize = Size(trackWidth*trackCount, visibleSize.height);
+	Size panelSize = Size(visibleSize.width / 5 + 20 * trackCount, visibleSize.height);
+	float trackWidth = panelSize.width / trackCount;
 	auto layerPanelFrame = LayerColor::create(pUI->themeColorB(0), panelSize.width, panelSize.height);
 	layerPanelFrame->setPosition((visibleSize.width - panelSize.width) / 2, 0);
 	layerPanelFrame->setName("panelFrame");
@@ -106,8 +106,26 @@ void SceneFallingSolo::createFadeInMask()
 void SceneFallingSolo::update(float dt)
 {
 	pGameController->updateNote(dt);
+	debugMsg();
 }
 
 void SceneFallingSolo::debugMsg()
 {
+	debug->deltaTime += Director::getInstance()->getDeltaTime();
+	if (debug->deltaTime > 0)
+	{
+		debug->deltaTime = 0;
+		auto bgl = this->getChildByName("bgLayer");
+		bgl->removeChildByName("debugLabel");
+		char* msg = new char[256];
+		sprintf(msg,
+				"Top time:%d\r\nCur time:%d",
+				pGameController->getTopTime(),
+				pGameController->getCurTime()
+				);
+		auto debuglb = debug->debugLabelMsg(msg);
+		debuglb->setName("debugLabel");
+		bgl->addChild(debuglb);
+	}
+
 }

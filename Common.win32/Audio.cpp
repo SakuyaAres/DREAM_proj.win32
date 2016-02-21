@@ -6,7 +6,7 @@ AudioSystem::AudioSystem() :
 	pBGMChannel(nullptr)
 {
 	auto result = System_Create(&pSystem);
-	pSystem->init(32, FMOD_INIT_NORMAL, 0);
+	pSystem->init(16, FMOD_INIT_NORMAL, 0);
 	pSystem->createSoundGroup("bgm", &pBGMGroup);
 	pSystem->createSoundGroup("sfx", &pSFXGroup);
 	pSystem->getSoftwareFormat(&sampleRate, 0, 0, 0, 0, 0);
@@ -31,7 +31,10 @@ void AudioSystem::loadSoundFromFile(const std::string & pFilename, SOUNDTYPE snd
 			result = pSystem->createStream(filepath, mode | FMOD_LOOP_OFF, 0, &pCurBGM);
 			break;
 		case SFX:
-			result = pSystem->createSound(filepath, mode | FMOD_LOOP_OFF, 0, &pCurBGM);
+			Sound* sfx;
+			result = pSystem->createSound(filepath, mode | FMOD_LOOP_OFF, 0, &sfx);
+			//sfx->setLoopCount(0);
+			sfx->setSoundGroup(pSFXGroup);
 			break;
 		case LOAD_BGM:
 			result = pSystem->createSound(filepath, mode | FMOD_LOOP_OFF, 0, &pCurBGM);

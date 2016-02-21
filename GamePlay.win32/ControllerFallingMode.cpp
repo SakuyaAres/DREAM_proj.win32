@@ -22,13 +22,14 @@ void ControllerFallingMode::setNoteField(Node* noteField)
 
 void ControllerFallingMode::initGamePlay()
 {
-	curTime = -3;
+	curTime = 0;
 	trackCount = pNoteMgr->trackCount;
 	notesInTrack = new vector<NoteObj>[trackCount];
 	indexInTrack = new int[trackCount];
 	for (int i = 0; i < trackCount; i++) indexInTrack[i] = 0;
 	bgmLength = pAudioSystem->getBgmLength();
-	pAudioSystem->loadSoundFromFile("musicdata/296478 FLOOR LEGENDS -KAC 2012- - KAC 2012 ULTIMATE MEDLEY -HISTORIA SOUND VOLTEX-/" + pNoteMgr->musicFile, AudioSystem::SOUNDTYPE::LOAD_BGM, true);
+	pAudioSystem->loadSoundFromFile("musicdata/198380 sakuzyo - Neurotoxin/" + pNoteMgr->musicFile, AudioSystem::SOUNDTYPE::LOAD_BGM, true);
+	pAudioSystem->loadSoundFromFile("musicdata/198380 sakuzyo - Neurotoxin/soft-hitnormal7.wav", AudioSystem::SOUNDTYPE::SFX, true);
 	dspClockInit = pAudioSystem->getDSPClockInMS();
 }
 
@@ -39,8 +40,9 @@ void ControllerFallingMode::updateNote(float dt)
 	moveNotesInField();
 	setTopTime();
 	drawNewNotes();
-	resizeLongNotes();
+	//resizeLongNotes();
 	removeOldNotes();
+	autoPlay();
 }
 
 int ControllerFallingMode::getTrackCount()
@@ -55,6 +57,7 @@ void ControllerFallingMode::setTimeSegPara()
 	{
 		float mspb = pNoteMgr->timingSegs[i].mspb;
 		float speedmod = pNoteMgr->timingSegs[i].speedModer;
+		pTimeSegPara[i].startTime = i == 0 ? 0 : pNoteMgr->timingSegs[i].startTime;
 		pTimeSegPara[i].noteSpeedPerMs = baseSpeed*speedmod*noteFieldHeight / (mspb * 4);
 		pTimeSegPara[i].timeFlowSpeedPerGLP = 1 / pTimeSegPara[i].noteSpeedPerMs;
 	}
@@ -76,26 +79,38 @@ void ControllerFallingMode::setBGMStat()
 	//int dspClock = pAudioSystem->getDSPClockInMS();
 }
 
-void ControllerFallingMode::setCurTime(float dt)
+bool ControllerFallingMode::setCurTime(float dt)
 {
+	bool waitFlag = false;
 	if (curTime >= 0)
 	{
-		deltaTime = pAudioSystem->getBgmPosition() - curTime;
-		curTime = pAudioSystem->getBgmPosition();
-		//deltaTime = pAudioSystem->getDSPClockInMS() - dspClockInit - curTime;
-		//curTime = pAudioSystem->getDSPClockInMS() - dspClockInit;
-		if (timeSegIndex < pNoteMgr->timingSegsSize - 1)
+		//deltaTime = pAudioSystem->getBgmPosition() - curTime;
+		//curTime = pAudioSystem->getBgmPosition();
+		deltaTime = Director::getInstance()->getDeltaTime() * 1000;
+		int bgmTime = pAudioSystem->getBgmPosition();
+		int gameTime = curTime + deltaTime;
+		if (gameTime < (float)bgmTime)
 		{
-			if (curTime >= pNoteMgr->timingSegs[timeSegIndex + 1].startTime)
-			{
-				timeSegIndex++;
-			}
+			curTime = bgmTime;
+		}
+		else if (gameTime>(float)bgmTime + 50)
+		{
+			waitFlag = true;
+		}
+		else
+		{
+			curTime = gameTime;
+		}
+		if (timeSegIndex < pNoteMgr->timingSegsSize - 1 && curTime >= pNoteMgr->timingSegs[timeSegIndex + 1].startTime)
+		{
+			timeSegIndex++;
 		}
 	}
 	else
 	{
 		curTime += dt * 1000;
 	}
+	return waitFlag;
 }
 
 void ControllerFallingMode::moveNotesInField()
@@ -107,9 +122,9 @@ void ControllerFallingMode::moveNotesInField()
 		{
 			for (Vector<NoteObj>::const_iterator iter = notesInTrack[i].cbegin(); iter != notesInTrack[i].cend(); iter++)
 			{
-				//iter->obj->setPositionY(iter->obj->getPositionY() - pTimeSegPara[timeSegIndex].noteSpeedPerMs*deltaTime);
-				iter->obj->stopAllActions();
-				iter->obj->runAction(MoveBy::create(deltaTime / 1000.f, Point(0, -pTimeSegPara[timeSegIndex].noteSpeedPerMs*deltaTime)));
+				iter->obj->setPositionY(iter->obj->getPositionY() - pTimeSegPara[timeSegIndex].noteSpeedPerMs*deltaTime);
+				//iter->obj->stopAllActions();
+				//iter->obj->runAction(MoveBy::create(deltaTime / 1000.f, Point(0, -pTimeSegPara[timeSegIndex].noteSpeedPerMs*deltaTime)));
 			}
 		}
 	}
@@ -119,21 +134,34 @@ void ControllerFallingMode::setTopTime()
 {
 	int virtualTopTime;
 	virtualTopTime = curTime + pTimeSegPara[timeSegIndex].timeFlowSpeedPerGLP*noteFieldHeight;
-
-	if (timeSegIndex < pNoteMgr->timingSegsSize - 1)
+	int topTimeSegIndex = getTimeSeg(virtualTopTime);
+	if (timeSegIndex == topTimeSegIndex)
 	{
-		int timeline = pNoteMgr->timingSegs[timeSegIndex + 1].startTime;
-		if (virtualTopTime <= timeline)
-		{
-			topTime = virtualTopTime;
-		}
-		else
-		{
-			float timeSegLinePos = (timeline - curTime)*pTimeSegPara[timeSegIndex].noteSpeedPerMs;
-			topTime = timeline + (noteFieldHeight - timeSegLinePos)*pTimeSegPara[timeSegIndex + 1].timeFlowSpeedPerGLP;
-		}
+		topTime = virtualTopTime;
 	}
-	else topTime = virtualTopTime;
+	else
+	{
+		//float timeLine = pNoteMgr->timingSegs[topTimeSegIndex].startTime;
+		//float timeLinePos = (timeLine - curTime)*pTimeSegPara[topTimeSegIndex-1].noteSpeedPerMs;
+		//topTime = timeLine + (noteFieldHeight - timeLinePos)*pTimeSegPara[topTimeSegIndex].timeFlowSpeedPerGLP;
+		float offsetTime = curTime;
+		float linePos = 0;
+		int nearestSegIndex = timeSegIndex;
+		for (int i = timeSegIndex; i < topTimeSegIndex; i++)
+		{
+			int nextLineTime = pTimeSegPara[i + 1].startTime;
+			float nextLinePos = (nextLineTime - offsetTime)*pTimeSegPara[i].timeFlowSpeedPerGLP;
+			if (nextLinePos + linePos < noteFieldHeight)
+			{
+				offsetTime = nextLineTime;
+				linePos += nextLinePos;
+			}
+			nearestSegIndex = i;
+		}
+		offsetTime += (noteFieldHeight - linePos) *pTimeSegPara[nearestSegIndex].timeFlowSpeedPerGLP;
+		topTime = offsetTime;
+	}
+
 }
 
 void ControllerFallingMode::drawNewNotes()
@@ -141,18 +169,68 @@ void ControllerFallingMode::drawNewNotes()
 	for (int i = 0; i < trackCount; i++)
 	{
 		if (pNoteMgr->trackNotes[i].size() == 0) continue;
-		vector<NoteManager::Note>::iterator iter = pNoteMgr->trackNotes[i].begin();
-		if (iter->startTime < topTime)
+		//vector<NoteManager::Note>* trackNotes = &pNoteMgr->trackNotes[i];
+		for (vector<NoteManager::Note>::iterator iter = pNoteMgr->trackNotes[i].begin(); iter != pNoteMgr->trackNotes[i].end();)
 		{
-			NoteObj note;
-			note.obj = createNote(iter, i);
-			note.obj->setPosition(Point(trackWidth*i, noteFieldHeight - (topTime - iter->startTime)*pTimeSegPara[findTimeSeg(topTime)].noteSpeedPerMs));
-			pNoteField->addChild(note.obj);
-			note.info = *iter;
-			pNoteMgr->trackNotes[i].erase(iter);
-			notesInTrack[i].push_back(note);
+			if (iter->startTime < topTime+2000)
+			{
+				NoteObj note;
+				float notePosY = getNoteOffsetY(iter->startTime);
+				note.obj = LayerColor::create(
+					Color4B(225 + 30 * (i % 2), 225, 225 + 30 * (1 - i % 2), 255),
+					trackWidth,
+					singleNoteHeight);
+				note.info = *iter;
+				note.obj->setPosition(trackWidth*i, getNoteOffsetY(iter->startTime));
+				if (note.info.noteType == NoteManager::Note::NoteType::LONG) note.obj->setContentSize(Size(trackWidth, getNoteOffsetY(iter->endTime) - notePosY + singleNoteHeight));
+				pNoteField->addChild(note.obj);
+				iter = pNoteMgr->trackNotes[i].erase(iter);
+				notesInTrack[i].push_back(note);
+			}
+			else break;
 		}
 	}
+}
+
+float ControllerFallingMode::getNoteOffsetY(int timePoint)
+{
+	int baseTime = curTime;
+	int targetSegIndex = getTimeSeg(timePoint);
+	float posy = 0;
+	for (int i = timeSegIndex; i < targetSegIndex; i++)
+	{
+		int nextLineTime = pTimeSegPara[i + 1].startTime;
+		posy += (nextLineTime - baseTime)*pTimeSegPara[i].noteSpeedPerMs;
+		baseTime = nextLineTime;
+	}
+	posy += (timePoint - baseTime)*pTimeSegPara[targetSegIndex].noteSpeedPerMs;
+
+	return posy;
+}
+
+Node * ControllerFallingMode::createNote(vector<NoteManager::Note>::iterator noteIter, int trackIndex)
+{
+	Node* noteobj = LayerColor::create(
+		Color4B(225 + 30 * (trackIndex % 2), 225, 225 + 30 * (1 - trackIndex % 2), 255),
+		trackWidth,
+		singleNoteHeight);
+	return noteobj;
+}
+
+void ControllerFallingMode::setNewNotePos(NoteObj* note, int trackIndex)
+{
+	int baseTime = curTime;
+	int startTime = note->info.startTime;
+	int noteTimeSegIndex = getTimeSeg(startTime);
+	float posy = 0;
+	for (int i = timeSegIndex; i < noteTimeSegIndex; i++)
+	{
+		int nextLineTime = pTimeSegPara[i + 1].startTime;
+		posy += (nextLineTime - baseTime)*pTimeSegPara[i].noteSpeedPerMs;
+		baseTime = nextLineTime;
+	}
+	posy += (startTime - baseTime)*pTimeSegPara[noteTimeSegIndex].noteSpeedPerMs;
+	note->obj->setPosition(trackWidth*trackIndex, posy);
 }
 
 void ControllerFallingMode::resizeLongNotes()
@@ -171,43 +249,13 @@ void ControllerFallingMode::resizeLongNotes()
 				}
 				else
 				{
-					float endToTopDist = (topTime - iter->info.endTime)*pTimeSegPara[findTimeSeg(topTime)].noteSpeedPerMs;
+					float endToTopDist = (topTime - iter->info.endTime)*pTimeSegPara[getTimeSeg(topTime)].noteSpeedPerMs;
 					iter->obj->setContentSize(Size(trackWidth, noteHeight - endToTopDist));
 					iter->resized = true;
 				}
 			}
 		}
 	}
-}
-
-Node * ControllerFallingMode::createNote(vector<NoteManager::Note>::iterator noteIter, int trackIndex)
-{
-	Node* noteobj = LayerColor::create(
-		Color4B(225 + 30 * (trackIndex % 2), 225, 225 + 30 * (1 - trackIndex % 2), 255),
-		trackWidth,
-		singleNoteHeight);
-	//if (noteIter->noteType == NoteManager::Note::NoteType::LONG)
-	//{
-	//	float height = 0;
-	//	int startTime = noteIter->startTime;
-	//	for (int i = timeSegIndex; i < pNoteMgr->timingSegsSize; i++)
-	//	{
-	//		int segTime = pNoteMgr->timingSegs[i].startTime;
-	//		if (segTime<startTime) continue;
-	//		if (noteIter->endTime > segTime)
-	//		{
-	//			height += (segTime - startTime)*pTimeSegPara[i].noteSpeedPerMs;
-	//			startTime = segTime;
-	//		}
-	//		else
-	//		{
-	//			height += (noteIter->endTime - startTime)*pTimeSegPara[i].noteSpeedPerMs;
-	//			break;
-	//		}
-	//	}
-	//	noteobj->setContentSize(Size(trackWidth, height));
-	//}
-	return noteobj;
 }
 
 void ControllerFallingMode::removeOldNotes()
@@ -220,12 +268,10 @@ void ControllerFallingMode::removeOldNotes()
 		{
 			deleteNote(i, iter);
 		}
-		else if (iter->info.noteType == NoteManager::Note::NoteType::LONG && (iter->hitting || curTime - iter->info.endTime > HITRANGE::MISS + 200))
+		else if (iter->info.noteType == NoteManager::Note::NoteType::LONG && curTime - iter->info.endTime > HITRANGE::MISS + 200)
 		{
 			deleteNote(i, iter);
 		}
-
-
 	}
 }
 
@@ -235,14 +281,44 @@ void ControllerFallingMode::deleteNote(int trackIndex, vector<NoteObj>::iterator
 	notesInTrack[trackIndex].erase(noteIter);
 }
 
-int ControllerFallingMode::findTimeSeg(int timePoint)
+void ControllerFallingMode::autoPlay()
 {
-	int index = -2;
+	for (int i = 0; i < trackCount; i++)
+	{
+		for (vector<NoteObj>::iterator iter = notesInTrack[i].begin(); iter != notesInTrack[i].end(); iter++)
+		{
+			if (iter->info.startTime < curTime&& !iter->hitting)
+			{
+				iter->hitting = true;
+				pAudioSystem->playSFX(0);
+			}
+		}
+	}
+}
+
+int ControllerFallingMode::getCurTime()
+{
+	return curTime;
+}
+
+int ControllerFallingMode::getTopTime()
+{
+	return topTime;
+}
+
+int ControllerFallingMode::getTimeSeg(int timePoint)
+{
+	int index = -1;
 	for (int i = 0; i < pNoteMgr->timingSegsSize; i++)
 	{
-		if (timePoint < pNoteMgr->timingSegs[i].startTime) index = i - 1;
+		int linePoint = 0;
+		if (i > 0)linePoint = pNoteMgr->timingSegs[i].startTime;
+		if (timePoint < linePoint)
+		{
+			index = i - 1;
+			break;
+		}
 	}
 	if (index >= 0) return index;
-	if (index < -1) return pNoteMgr->timingSegsSize - 1;
-	else return 0;
+	else return pNoteMgr->timingSegsSize - 1;
 }

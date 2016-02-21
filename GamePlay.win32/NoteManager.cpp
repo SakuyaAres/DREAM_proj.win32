@@ -23,8 +23,10 @@ void NoteManager::loadfile(string filepath)
 
 	string buffer;
 	getline(file, buffer);
-	if (strcmp(buffer.substr(0, 3).c_str(), "osu") == 0)
-		loadOsuFile();
+	unsigned char utf8Head[] = { 0xEF, 0xBB, 0xBF };
+	if (strcmp(buffer.substr(0, 3).c_str(), "osu") == 0) loadOsuFile();
+	else if (memcmp(buffer.substr(0, 3).c_str(), utf8Head, sizeof(utf8Head)) == 0 && strcmp(buffer.substr(3, 3).c_str(), "osu") == 0) loadOsuFile();
+	file.close();
 }
 
 void NoteManager::loadOsuFile()
@@ -114,7 +116,7 @@ void NoteManager::loadOsuFileTiming(string & retBuffer)
 			timing.bpm = 60000 / timing.mspb;
 			timing.speedModer = 1.0;
 		}
-		else timing.speedModer = 100 / timing.mspb * -1;
+		else timing.speedModer = timing.mspb / 100 * -1;
 		timing.isHighlight = atoi(data[7].c_str()) == 1 ? true : false;
 		vTimings.push_back(timing);
 	}
@@ -148,7 +150,7 @@ void NoteManager::loadOsuFileNote(string & retBuffer)
 		note.noteType = note.endTime ? note.LONG : note.SINGLE;
 		vNotes.push_back(note);
 	}
-	int divisor = maxPosX / trackCount;
+	float divisor = (float)maxPosX / trackCount;
 	trackNotes = new vector<Note>[trackCount];
 	for (int i = 0; i < vNotes.size(); i++)
 	{

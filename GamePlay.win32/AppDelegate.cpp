@@ -64,13 +64,13 @@ void AppDelegate::setGLVsync(bool enabled)
 	if (wglSwapIntervalEXT == NULL) return;
 	if (enabled) 
 	{
-		if(isVsyncInit) wglSwapIntervalEXTb(0);
-		else wglSwapIntervalEXT(0);
+		if(isVsyncInit) wglSwapIntervalEXTb(1);
+		else wglSwapIntervalEXT(1);
 	}
 	else
 	{
-		if (isVsyncInit) wglSwapIntervalEXTb(1);
-		else wglSwapIntervalEXT(1);
+		if (isVsyncInit) wglSwapIntervalEXTb(0);
+		else wglSwapIntervalEXT(0);
 	}
 }
 
@@ -90,15 +90,15 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	auto glview = director->getOpenGLView();
 	if (!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-		glview = GLViewImpl::createWithRect("Dream_Cocos", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
+		glview = GLViewImpl::createWithRect("DreaMus", Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
-		glview = GLViewImpl::create("Dream_Cocos");
+		glview = GLViewImpl::create("DreaMus");
 #endif
 		director->setOpenGLView(glview);
 	}
 	// turn on display FPS
 	director->setDisplayStats(true);
-	setGLVsync(true);
+	setGLVsync(false);
 	plogfile << "logtest2\n";
 	plogfile.close();
 
