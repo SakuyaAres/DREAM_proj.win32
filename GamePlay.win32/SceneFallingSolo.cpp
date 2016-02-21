@@ -27,7 +27,7 @@ bool SceneFallingSolo::init()
 	createBG();
 	createHud();
 	pGameController = new ControllerFallingMode("musicdata/198380 sakuzyo - Neurotoxin/sakuzyo - Neurotoxin (Rumia-) [Black Another].osu");
-	
+
 	createPlayerPanel(pGameController->getTrackCount());
 	pGameController->setNoteField(this->getChildByName("panelFrame")->getChildByName("panelClip")->getChildByName("panelNoteField"));
 
@@ -112,16 +112,21 @@ void SceneFallingSolo::update(float dt)
 void SceneFallingSolo::debugMsg()
 {
 	debug->deltaTime += Director::getInstance()->getDeltaTime();
-	if (debug->deltaTime > 0)
+	if (debug->deltaTime > 0.015)
 	{
 		debug->deltaTime = 0;
 		auto bgl = this->getChildByName("bgLayer");
 		bgl->removeChildByName("debugLabel");
 		char* msg = new char[256];
+		float topTime = pGameController->getTopTime();
+		float curTime = pGameController->getCurTime();
+		unsigned int bgmTime = pAudioSystem->getBgmPosition();
 		sprintf(msg,
-				"Top time:%d\r\nCur time:%d",
-				pGameController->getTopTime(),
-				pGameController->getCurTime()
+				"Top time:%.5f\r\nCur time:%.5f\r\nBgm time:%d\r\nOffset:%+2.5f",
+				topTime,
+				curTime,
+				bgmTime,
+				(float)bgmTime - curTime
 				);
 		auto debuglb = debug->debugLabelMsg(msg);
 		debuglb->setName("debugLabel");

@@ -116,7 +116,7 @@ void NoteManager::loadOsuFileTiming(string & retBuffer)
 			timing.bpm = 60000 / timing.mspb;
 			timing.speedModer = 1.0;
 		}
-		else timing.speedModer = timing.mspb / 100 * -1;
+		else timing.speedModer = 100 / timing.mspb * -1;
 		timing.isHighlight = atoi(data[7].c_str()) == 1 ? true : false;
 		vTimings.push_back(timing);
 	}

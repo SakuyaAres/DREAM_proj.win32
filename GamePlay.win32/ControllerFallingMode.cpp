@@ -29,13 +29,13 @@ void ControllerFallingMode::initGamePlay()
 	for (int i = 0; i < trackCount; i++) indexInTrack[i] = 0;
 	bgmLength = pAudioSystem->getBgmLength();
 	pAudioSystem->loadSoundFromFile("musicdata/198380 sakuzyo - Neurotoxin/" + pNoteMgr->musicFile, AudioSystem::SOUNDTYPE::LOAD_BGM, true);
-	pAudioSystem->loadSoundFromFile("musicdata/198380 sakuzyo - Neurotoxin/soft-hitnormal7.wav", AudioSystem::SOUNDTYPE::SFX, true);
+	pAudioSystem->loadSoundFromFile("musicdata/198380 sakuzyo - Neurotoxin/soft-hitnormal7.wav", AudioSystem::SOUNDTYPE::SFX, false);
 	dspClockInit = pAudioSystem->getDSPClockInMS();
 }
 
 void ControllerFallingMode::updateNote(float dt)
 {
-	setBGMStat();
+	updateAudio();
 	setCurTime(dt);
 	moveNotesInField();
 	setTopTime();
@@ -63,7 +63,7 @@ void ControllerFallingMode::setTimeSegPara()
 	}
 }
 
-void ControllerFallingMode::setBGMStat()
+void ControllerFallingMode::updateAudio()
 {
 	if (curTime >= 0 && !bgmStarted)
 	{
@@ -76,7 +76,7 @@ void ControllerFallingMode::setBGMStat()
 		else pAudioSystem->resumeBGM();
 		bgmIsPausedPrev = isPaused;
 	}
-	//int dspClock = pAudioSystem->getDSPClockInMS();
+	pAudioSystem->update();
 }
 
 bool ControllerFallingMode::setCurTime(float dt)
@@ -87,13 +87,14 @@ bool ControllerFallingMode::setCurTime(float dt)
 		//deltaTime = pAudioSystem->getBgmPosition() - curTime;
 		//curTime = pAudioSystem->getBgmPosition();
 		deltaTime = Director::getInstance()->getDeltaTime() * 1000;
-		int bgmTime = pAudioSystem->getBgmPosition();
-		int gameTime = curTime + deltaTime;
-		if (gameTime < (float)bgmTime)
+		unsigned int bgmTime = pAudioSystem->getBgmPosition();
+		float gameTime = curTime + deltaTime;
+		if (gameTime < (float)bgmTime - 10)
 		{
 			curTime = bgmTime;
+			//curTime = gameTime;
 		}
-		else if (gameTime>(float)bgmTime + 50)
+		else if (gameTime>(float)bgmTime + 5)
 		{
 			waitFlag = true;
 		}
@@ -108,7 +109,7 @@ bool ControllerFallingMode::setCurTime(float dt)
 	}
 	else
 	{
-		curTime += dt * 1000;
+		curTime += Director::getInstance()->getDeltaTime() * 1000;
 	}
 	return waitFlag;
 }
@@ -123,8 +124,7 @@ void ControllerFallingMode::moveNotesInField()
 			for (Vector<NoteObj>::const_iterator iter = notesInTrack[i].cbegin(); iter != notesInTrack[i].cend(); iter++)
 			{
 				iter->obj->setPositionY(iter->obj->getPositionY() - pTimeSegPara[timeSegIndex].noteSpeedPerMs*deltaTime);
-				//iter->obj->stopAllActions();
-				//iter->obj->runAction(MoveBy::create(deltaTime / 1000.f, Point(0, -pTimeSegPara[timeSegIndex].noteSpeedPerMs*deltaTime)));
+				//iter->obj->setPositionY((iter->info.startTime - curTime)*pTimeSegPara[timeSegIndex].noteSpeedPerMs);
 			}
 		}
 	}
@@ -132,7 +132,7 @@ void ControllerFallingMode::moveNotesInField()
 
 void ControllerFallingMode::setTopTime()
 {
-	int virtualTopTime;
+	float virtualTopTime;
 	virtualTopTime = curTime + pTimeSegPara[timeSegIndex].timeFlowSpeedPerGLP*noteFieldHeight;
 	int topTimeSegIndex = getTimeSeg(virtualTopTime);
 	if (timeSegIndex == topTimeSegIndex)
@@ -172,7 +172,7 @@ void ControllerFallingMode::drawNewNotes()
 		//vector<NoteManager::Note>* trackNotes = &pNoteMgr->trackNotes[i];
 		for (vector<NoteManager::Note>::iterator iter = pNoteMgr->trackNotes[i].begin(); iter != pNoteMgr->trackNotes[i].end();)
 		{
-			if (iter->startTime < topTime+2000)
+			if (iter->startTime < topTime + 2000)
 			{
 				NoteObj note;
 				float notePosY = getNoteOffsetY(iter->startTime);
@@ -287,7 +287,7 @@ void ControllerFallingMode::autoPlay()
 	{
 		for (vector<NoteObj>::iterator iter = notesInTrack[i].begin(); iter != notesInTrack[i].end(); iter++)
 		{
-			if (iter->info.startTime < curTime&& !iter->hitting)
+			if (iter->info.startTime <= curTime && !iter->hitting)
 			{
 				iter->hitting = true;
 				pAudioSystem->playSFX(0);
@@ -296,12 +296,12 @@ void ControllerFallingMode::autoPlay()
 	}
 }
 
-int ControllerFallingMode::getCurTime()
+float ControllerFallingMode::getCurTime()
 {
 	return curTime;
 }
 
-int ControllerFallingMode::getTopTime()
+float ControllerFallingMode::getTopTime()
 {
 	return topTime;
 }

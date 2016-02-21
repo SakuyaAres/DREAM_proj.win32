@@ -51,5 +51,7 @@ class AudioSystem
 	int getDSPClockInMS();
 	unsigned long getSampleRate();
 
+	void update();
+
 };
 

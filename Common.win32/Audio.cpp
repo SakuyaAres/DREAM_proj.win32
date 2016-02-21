@@ -6,7 +6,7 @@ AudioSystem::AudioSystem() :
 	pBGMChannel(nullptr)
 {
 	auto result = System_Create(&pSystem);
-	pSystem->init(16, FMOD_INIT_NORMAL, 0);
+	pSystem->init(128, FMOD_INIT_NORMAL, 0);
 	pSystem->createSoundGroup("bgm", &pBGMGroup);
 	pSystem->createSoundGroup("sfx", &pSFXGroup);
 	pSystem->getSoftwareFormat(&sampleRate, 0, 0, 0, 0, 0);
@@ -53,6 +53,8 @@ void AudioSystem::playBGM()
 		true,
 		&pBGMChannel
 		);
+	pBGMChannel->setVolume(0.5);
+	pBGMChannel->setPriority(0);
 	pBGMChannel->setPaused(false);
 }
 
@@ -91,7 +93,11 @@ unsigned int AudioSystem::getBgmLength()
 unsigned int AudioSystem::getBgmPosition()
 {
 	unsigned int posi = 0;
-	pBGMChannel->getPosition(&posi, FMOD_TIMEUNIT_MS);
+	pBGMChannel->getPosition(&posi, FMOD_TIMEUNIT_MS| FMOD_TIMEUNIT_BUFFERED);
+	//float freq;
+	//pBGMChannel->getFrequency(&freq);
+	//pBGMChannel->getPosition(&posi, FMOD_TIMEUNIT_PCM);
+	
 	return posi;
 }
 
@@ -115,4 +121,9 @@ int AudioSystem::getDSPClockInMS()
 	pSystem->getDSPClock(&hi, &lo);
 	unsigned long clock= ((unsigned long)hi << 32) + lo;
 	return 1000 * clock / sampleRate;
+}
+
+void AudioSystem::update()
+{
+	pSystem->update();
 }

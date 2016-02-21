@@ -69,7 +69,7 @@ class ControllerFallingMode
 	int getTimeSeg(int timePoint);
 
 	private:
-	void setBGMStat();
+	void updateAudio();
 	bool setCurTime(float dt);
 	void moveNotesInField();
 	void setTopTime();
@@ -84,6 +84,6 @@ class ControllerFallingMode
 	void autoPlay();
 
 	public:
-	int getCurTime();
-	int getTopTime();
+	float getCurTime();
+	float getTopTime();
 };
