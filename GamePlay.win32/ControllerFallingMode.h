@@ -15,7 +15,9 @@ class ControllerFallingMode
 
 	public:
 	NoteManager* pNoteMgr;
+	Node* pPanelFrame;
 	Node* pNoteField;
+	Node** pKeyButtons;
 	float singleNoteHeight = 10;
 	float baseSpeed = 2;
 	bool isPaused = false;
@@ -56,13 +58,20 @@ class ControllerFallingMode
 	};
 	vector<NoteObj>* notesInTrack;
 	int* indexInTrack;
+	struct KeyInfo
+	{
+		EventKeyboard::KeyCode keycode;
+		bool isPressed;
+	};
+	vector<KeyInfo> inKeys;
 
 	public:
 	void initNoteManager(string noteFilePath);
-	void setNoteField(Node* noteField);
+	void setPlayPanel(Node* panelFrame);
 	void initGamePlay();
 	void setTimeSegPara();
 	void updateNote(float dt);
+	void pushKey(EventKeyboard::KeyCode keycode,bool isPressed);
 	
 	public:
 	int getTrackCount();

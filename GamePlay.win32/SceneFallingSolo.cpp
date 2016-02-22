@@ -29,7 +29,7 @@ bool SceneFallingSolo::init()
 	pGameController = new ControllerFallingMode("musicdata/198380 sakuzyo - Neurotoxin/sakuzyo - Neurotoxin (Rumia-) [Black Another].osu");
 
 	createPlayerPanel(pGameController->getTrackCount());
-	pGameController->setNoteField(this->getChildByName("panelFrame")->getChildByName("panelClip")->getChildByName("panelNoteField"));
+	pGameController->setPlayPanel(this->getChildByName("panelFrame"));
 
 	//pNoteManager = new NoteManager("musicdata/Run Through the Sky (Short)/I've - Run Through the Sky (Sakuya Ares) [5K Hard].osu");
 	//auto scene = Director::getInstance()->getRunningScene();
@@ -41,6 +41,11 @@ bool SceneFallingSolo::init()
 
 	//Audio System operation
 	pAudioSystem->stopBGM();
+
+	auto keyListener = EventListenerKeyboard::create();
+	keyListener->onKeyPressed = CC_CALLBACK_2(SceneFallingSolo::onKeyPressed, this);
+	keyListener->onKeyReleased = CC_CALLBACK_2(SceneFallingSolo::onKeyReleased, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(keyListener, this);
 
 	scheduleUpdate();
 
@@ -85,6 +90,24 @@ void SceneFallingSolo::createPlayerPanel(int trackCount)
 	layerNoteField->setPosition(Point(1, visibleSize.height / 8));
 	layerNoteField->setName("panelNoteField");
 	clipNode->addChild(layerNoteField);
+	
+	for (int i = 0; i < trackCount; i++)
+	{
+		auto key = LayerColor::create(Color4B(255, 255, 255, 150), trackWidth - 4, visibleSize.height / 8 - 2);
+		key->setPositionX(trackWidth*i + 2);
+		char name[5];
+		sprintf_s(name, 5, "key%d", i);
+		key->setName(name);
+		layerPanelFrame->addChild(key);
+		//auto hitEffect = Sprite::create("image/FallingHitLight.png");
+		//hitEffect->ignoreAnchorPointForPosition(false);
+		//hitEffect->setAnchorPoint(Point(0.5, 0));
+		//hitEffect->setOpacity(255);
+		//hitEffect->setPosition(Point(trackWidth*(i+0.5), visibleSize.height / 8));
+		//sprintf_s(name, "hit%d", i);
+		//layerPanelFrame->addChild(hitEffect);
+	}
+
 }
 
 void SceneFallingSolo::createFadeInMask()
@@ -107,6 +130,16 @@ void SceneFallingSolo::update(float dt)
 {
 	pGameController->updateNote(dt);
 	debugMsg();
+}
+
+void SceneFallingSolo::onKeyPressed(EventKeyboard::KeyCode keycode, Event * e)
+{
+	pGameController->pushKey(keycode, true);
+}
+
+void SceneFallingSolo::onKeyReleased(EventKeyboard::KeyCode keycode, Event * e)
+{
+	pGameController->pushKey(keycode, false);
 }
 
 void SceneFallingSolo::debugMsg()

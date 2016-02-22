@@ -38,6 +38,9 @@ class SceneFallingSolo : public cocos2d::Layer
 
 	void update(float dt) override;
 
+	void onKeyPressed(EventKeyboard::KeyCode keycode, Event* e);
+	void onKeyReleased(EventKeyboard::KeyCode keycode, Event* e);
+
 	void debugMsg();
 };
 

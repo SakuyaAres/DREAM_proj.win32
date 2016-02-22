@@ -12,9 +12,25 @@ void ControllerFallingMode::initNoteManager(string noteFilePath)
 	pNoteMgr = new NoteManager(noteFilePath);
 }
 
-void ControllerFallingMode::setNoteField(Node* noteField)
+void ControllerFallingMode::setPlayPanel(Node* panelFrame)
 {
-	pNoteField = noteField;
+	pPanelFrame = panelFrame;
+	pNoteField = pPanelFrame->getChildByName("panelClip")->getChildByName("panelNoteField");
+	pKeyButtons = new Node*[trackCount];
+	for (int i = 0; i < trackCount; i++)
+	{
+		char keyname[5];
+		sprintf_s(keyname, 5, "key%d", i);
+		pKeyButtons[i] = pPanelFrame->getChildByName(keyname);
+		pKeyButtons[i]->runAction(
+			RepeatForever::create(
+				Sequence::createWithTwoActions(
+					FadeTo::create(0.02, 100),
+					FadeTo::create(0.02, 185)
+					)
+				)
+			);
+	}
 	noteFieldHeight = pNoteField->getContentSize().height;
 	trackWidth = pNoteField->getContentSize().width / pNoteMgr->trackCount;
 	setTimeSegPara();
@@ -25,8 +41,9 @@ void ControllerFallingMode::initGamePlay()
 	curTime = 0;
 	trackCount = pNoteMgr->trackCount;
 	notesInTrack = new vector<NoteObj>[trackCount];
-	indexInTrack = new int[trackCount];
-	for (int i = 0; i < trackCount; i++) indexInTrack[i] = 0;
+	//indexInTrack = new int[trackCount];
+	//inKeys = new vector<EventKeyboard>[trackCount];
+	//for (int i = 0; i < trackCount; i++) indexInTrack[i] = 0;
 	bgmLength = pAudioSystem->getBgmLength();
 	pAudioSystem->loadSoundFromFile("musicdata/198380 sakuzyo - Neurotoxin/" + pNoteMgr->musicFile, AudioSystem::SOUNDTYPE::LOAD_BGM, true);
 	pAudioSystem->loadSoundFromFile("musicdata/198380 sakuzyo - Neurotoxin/soft-hitnormal7.wav", AudioSystem::SOUNDTYPE::SFX, false);
@@ -43,6 +60,14 @@ void ControllerFallingMode::updateNote(float dt)
 	//resizeLongNotes();
 	removeOldNotes();
 	autoPlay();
+}
+
+void ControllerFallingMode::pushKey(EventKeyboard::KeyCode keycode, bool isPressed)
+{
+	KeyInfo key;
+	key.keycode = keycode;
+	key.isPressed = isPressed;
+	inKeys.push_back(key);
 }
 
 int ControllerFallingMode::getTrackCount()
@@ -82,21 +107,22 @@ void ControllerFallingMode::updateAudio()
 bool ControllerFallingMode::setCurTime(float dt)
 {
 	bool waitFlag = false;
-	if (curTime >= 0)
+	unsigned int bgmTime = pAudioSystem->getBgmPosition();
+	if (curTime >= 0 && bgmTime > 0)
 	{
 		//deltaTime = pAudioSystem->getBgmPosition() - curTime;
 		//curTime = pAudioSystem->getBgmPosition();
 		deltaTime = Director::getInstance()->getDeltaTime() * 1000;
-		unsigned int bgmTime = pAudioSystem->getBgmPosition();
 		float gameTime = curTime + deltaTime;
 		if (gameTime < (float)bgmTime - 10)
 		{
-			curTime = bgmTime;
-			//curTime = gameTime;
+			//curTime = bgmTime;
+			curTime = gameTime + deltaTime*0.15;
 		}
-		else if (gameTime>(float)bgmTime + 5)
+		else if (gameTime>(float)bgmTime + 10)
 		{
-			waitFlag = true;
+			//waitFlag = true;
+			curTime = gameTime - deltaTime*0.15;
 		}
 		else
 		{
@@ -107,10 +133,10 @@ bool ControllerFallingMode::setCurTime(float dt)
 			timeSegIndex++;
 		}
 	}
-	else
-	{
-		curTime += Director::getInstance()->getDeltaTime() * 1000;
-	}
+	//else
+	//{
+	//	curTime += Director::getInstance()->getDeltaTime() * 1000;
+	//}
 	return waitFlag;
 }
 
@@ -125,6 +151,7 @@ void ControllerFallingMode::moveNotesInField()
 			{
 				iter->obj->setPositionY(iter->obj->getPositionY() - pTimeSegPara[timeSegIndex].noteSpeedPerMs*deltaTime);
 				//iter->obj->setPositionY((iter->info.startTime - curTime)*pTimeSegPara[timeSegIndex].noteSpeedPerMs);
+				//iter->obj->setPositionY(getNoteOffsetY(iter->info.startTime));
 			}
 		}
 	}
@@ -291,6 +318,20 @@ void ControllerFallingMode::autoPlay()
 			{
 				iter->hitting = true;
 				pAudioSystem->playSFX(0);
+				auto hitEffect = Sprite::create("image/FallingHitLight.png");
+				hitEffect->ignoreAnchorPointForPosition(false);
+				hitEffect->setAnchorPoint(Point(0.5, 0.25));
+				hitEffect->setOpacity(255);
+				hitEffect->setPosition(Point(trackWidth*(i + 0.5), visibleSize.height / 8));
+				hitEffect->setScale(2, 0);
+				//sprintf_s(name, "hit%d", i);
+				pPanelFrame->addChild(hitEffect);
+				hitEffect->runAction(
+					Sequence::createWithTwoActions(
+						ScaleTo::create(0.15, 0, 1),
+						RemoveSelf::create()
+						)
+					);
 			}
 		}
 	}
