@@ -124,6 +124,10 @@ bool ControllerFallingMode::setCurTime(float dt)
 			//waitFlag = true;
 			curTime = gameTime - deltaTime*0.15;
 		}
+		else if (abs(gameTime - bgmTime) > 50)
+		{
+			curTime = bgmTime;
+		}
 		else
 		{
 			curTime = gameTime;
